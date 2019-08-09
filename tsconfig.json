@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "es5",
+      "es6",
+      "dom",
+      "dom.iterable",
+     "scripthost"
+    ],
+    "outDir": "./build/",
+    "target": "es2017",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
