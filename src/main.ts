@@ -1,44 +1,14 @@
 import './styles/app.scss';
-
-/**
- * generate table head
- */
-function initTableHead(): void {
-    const component = document.getElementsByTagName('thead')[0];
-
-    const tmpl: any = (document.getElementById('table-head') as HTMLTemplateElement).content.cloneNode(true);
-    const tr = tmpl.querySelector('tr');
-    tr.innerHTML = '<th></th>';
-
-    const alphabet = new Array(26).fill(1).map((_, i): string => String.fromCharCode(65 + i));
-    for (let i = 0; i < 10; i++) {
-        tr.innerHTML += `<th>${alphabet[i]}</th>`;
-    }
-    component.appendChild(tmpl);
-}
-
-/**
- * generate table body
- */
-function initTableBody(): void {
-    const component = document.getElementsByTagName('tbody')[0];
-
-    for (let i = 1; i < 21; i++) {
-        const tmpl: any = (document.getElementById('table-tbody') as HTMLTemplateElement).content.cloneNode(true);
-
-        tmpl.querySelector('tr td.vertical__index_label').innerText = i;
-        for (let j = 1; j < 11; j++) {
-            tmpl.querySelector(`tr td.vertical__index_${j}`).innerText = 'random text';
-        }
-
-        component.appendChild(tmpl);
-    }
-}
+import components from './components';
 
 const main = (): void => {
     console.log('start App!');
-    initTableHead();
-    initTableBody();
+
+    // create new table
+    new components.Table();
+
+    // add resizable behavior
+    new components.ResizableTable('mainTable');
 };
 
 main();
