@@ -97,9 +97,8 @@ class ResizableTable {
      */
     protected static resizeRowBehavior(element: HTMLElement): void {
         const onMouseMove = (event?: MouseEvent): void => {
-            const tr = element.parentElement;
-
-            tr.style.height = `${event.clientY}px`;
+            const tr: HTMLElement = element.parentElement;
+            tr.style.height = `${event.clientY - 130}px`;
         };
 
         const onMouseup = (): void => {
@@ -115,6 +114,10 @@ class ResizableTable {
 
         element.addEventListener('mouseover', (e): void => {
             (e.target as HTMLElement).style.borderBottom = '2px solid #0000ff';
+        });
+
+        element.addEventListener('mouseout', (e): void => {
+            (e.target as HTMLElement).style.borderBottom = '';
         });
     }
 
