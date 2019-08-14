@@ -1,7 +1,7 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');;
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path');  //eslint-disable-line
+const HtmlWebpackPlugin = require('html-webpack-plugin');  //eslint-disable-line
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');  //eslint-disable-line
+const ExtractTextPlugin = require('extract-text-webpack-plugin');  //eslint-disable-line
 
 module.exports = [
     // client
@@ -11,41 +11,41 @@ module.exports = [
         entry: './main.ts',
         output: {
             filename: 'bundle.js',
-            path: path.join(__dirname, 'dist')
+            path: path.join(__dirname, 'dist'),
         },
         devtool: 'inline-source-map',
         devServer: {
             contentBase: path.join(__dirname, 'src'),
             watchContentBase: true,
             compress: true,
-            port: 4200
+            port: 4200,
         },
         module: {
             rules: [
                 {
                     test: /\.tsx?$/,
                     use: 'ts-loader',
-                    exclude: '/node_modules/'
+                    exclude: '/node_modules/',
                 },
                 {
                     test: /\.(s*)css$/,
                     use: ExtractTextPlugin.extract({
                         fallback: 'style-loader',
-                        use: ['css-loader', 'sass-loader']
-                    })
-                }
-            ]
+                        use: ['css-loader', 'sass-loader'],
+                    }),
+                },
+            ],
         },
         plugins: [
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
                 title: 'Development',
-                template: './index.html'
+                template: './index.html',
             }),
-            new ExtractTextPlugin('style.css')
+            new ExtractTextPlugin('style.css'),
         ],
         resolve: {
-            extensions: ['.ts', '.js']
+            extensions: ['.ts', '.js'],
         },
 
     },

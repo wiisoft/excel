@@ -5,10 +5,10 @@ const main = (): void => {
     console.log('start App!');
 
     // create new table
-    new components.Table();
+    components.Table.init();
 
     // add resizable behavior
-    new components.ResizableTable('mainTable');
+    components.ResizableTable.init('mainTable');
 };
 
 main();

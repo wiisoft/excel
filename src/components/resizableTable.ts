@@ -1,15 +1,53 @@
 class ResizableTable {
-
     public table: HTMLElement;
 
-    constructor(element: string) {
-        this.table = document.getElementById(element);
+    protected constructor(elementId: string) {
+        this.table = document.getElementById(elementId);
 
-        this.horizontalResize()
+        const tableHead = this.table.getElementsByTagName('thead')[0];
+        const tableBody = this.table.getElementsByTagName('tbody')[0];
+
+        this.resizeColumn(tableHead);
+        this.resizeRow(tableBody);
     }
 
-    protected horizontalResize(): void {
-        const row = this.table.getElementsByTagName('tr')[0];
+    public static init(elementId: string): ResizableTable {
+        return new ResizableTable(elementId);
+    }
+
+    /**
+     * resize row
+     * @param element
+     */
+    protected resizeRow(element: HTMLElementTagNameMap['tbody']): void {
+        const rows = [...element.getElementsByTagName('tr')];
+        const tableWidth = this.table.offsetWidth;
+
+        rows.forEach((row: HTMLElement): void => {
+            const div = ResizableTable.createDiv({
+                bottom: '0',
+                left: '0',
+                height: '5px',
+                position: 'absolute',
+                cursor: 'row-resize',
+                userSelect: 'none',
+                width: `${tableWidth}px`,
+            });
+
+            // add div resize handler only for first element
+            row.appendChild(div);
+            row.style.position = 'relative';
+
+            ResizableTable.resizeRowBehavior(div);
+        });
+    }
+
+    /**
+     * resize column
+     * @param element
+     */
+    protected resizeColumn(element: HTMLElementTagNameMap['thead']): void {
+        const row = element.getElementsByTagName('tr')[0];
         const columns = row ? row.children : undefined;
 
         if (!columns) return;
@@ -18,77 +56,112 @@ class ResizableTable {
         const tableHeight = this.table.offsetHeight;
 
         for (let i = 0; i < columns.length; i++) {
-            const div = ResizableTable.createDiv(tableHeight);
+            // add div block for each column
+            const div = ResizableTable.createDiv({
+                top: '0',
+                right: '0',
+                width: '5px',
+                position: 'absolute',
+                cursor: 'col-resize',
+                userSelect: 'none',
+                height: `${tableHeight}px`,
+            });
 
             // add div resize handler
             columns[i].appendChild(div);
             (columns[i] as HTMLElement).style.position = 'relative';
-            this.setListeners(div);
+            ResizableTable.resizeColumnBehavior(div);
         }
-
     }
 
     /**
      * create div with absolute position on right side  column
-     * @param height
+     * @param style
+     * @return HTMLElementTagNameMap
      */
-    protected static createDiv(height: number): HTMLElementTagNameMap['div'] {
+    protected static createDiv(style: { [key: string]: string }): HTMLElementTagNameMap['div'] {
         const div = document.createElement('div');
-        div.style.top = '0';
-        div.style.right = '0';
-        div.style.width = '5px';
-        div.style.position = 'absolute';
-        div.style.cursor = 'col-resize';
-        div.style.userSelect = 'none';
-        div.style.height = `${height}px`;
+
+        const keys = Object.keys(style);
+        const values = Object.values(style);
+        for (let i = 0; i < keys.length; i += 1) {
+            div.style.setProperty(keys[i], values[i]);
+        }
+
         return div;
     }
 
+    /**
+     *  add listeners to table row
+     * @param element
+     */
+    protected static resizeRowBehavior(element: HTMLElement): void {
+        const onMouseMove = (event?: MouseEvent): void => {
+            const tr = element.parentElement;
+
+            tr.style.height = `${event.clientY}px`;
+        };
+
+        const onMouseup = (): void => {
+            document.documentElement.removeEventListener('mousemove', onMouseMove, false);
+            document.documentElement.removeEventListener('mouseup', onMouseup, false);
+        };
+        const onMouseDown = (): void => {
+            document.documentElement.addEventListener('mousemove', onMouseMove, false);
+            document.documentElement.addEventListener('mouseup', onMouseup, false);
+        };
+
+        element.addEventListener('mousedown', onMouseDown, false);
+
+        element.addEventListener('mouseover', (e): void => {
+            (e.target as HTMLElement).style.borderBottom = '2px solid #0000ff';
+        });
+    }
 
     /**
-     * add listeners to table row
-     * @param div
+     * add listeners to table column
+     * @param element
      */
-    protected setListeners(div: HTMLElement): void {
-        let pageX: number, curCol: HTMLElement | null, nxtCol: Element | null, curColWidth: number, nxtColWidth: number;
+    private static resizeColumnBehavior(element: HTMLElement): void {
+        let elementPageX: number;
+        let currentColumn: HTMLElement | null;
+        let nextColumn: Element | null;
+        let currentColumnWidth: number;
+        let nextColumnWidth: number;
 
-        div.addEventListener('mousedown', function (e) {
-            curCol = (e.target as HTMLElement).parentElement;
-            nxtCol = curCol.nextElementSibling;
-            pageX = e.pageX;
+        element.addEventListener('mousedown', (e): void => {
+            currentColumn = (e.target as HTMLElement).parentElement;
+            nextColumn = currentColumn.nextElementSibling;
+            elementPageX = e.pageX;
 
-            const padding: number = ResizableTable.paddingDiff(curCol);
+            const padding: number = ResizableTable.paddingDiff(currentColumn);
 
-            curColWidth = curCol.offsetWidth - padding;
-            if (nxtCol)
-                nxtColWidth = (nxtCol as HTMLElement).offsetWidth - padding;
+            currentColumnWidth = currentColumn.offsetWidth - padding;
+            if (nextColumn) nextColumnWidth = (nextColumn as HTMLElement).offsetWidth - padding;
         });
 
-        div.addEventListener('mouseover', function (e) {
-            (e.target as HTMLElement).style.borderRight = '7px solid #0000ff';
+        element.addEventListener('mouseover', (e): void => {
+            (e.target as HTMLElement).style.borderRight = '2px solid #0000ff';
         });
 
-        div.addEventListener('mouseout', function (e) {
+        element.addEventListener('mouseout', (e): void => {
             (e.target as HTMLElement).style.borderRight = '';
         });
 
-        document.addEventListener('mousemove', function (e) {
-            if (curCol) {
-                const diffX = e.pageX - pageX;
-
-                if (nxtCol)
-                    (nxtCol as HTMLElement).style.width = (nxtColWidth - (diffX)) + 'px';
-
-                curCol.style.width = (curColWidth + diffX) + 'px';
+        document.addEventListener('mousemove', (e): void => {
+            if (currentColumn) {
+                const diffX = e.pageX - elementPageX;
+                if (nextColumn) (nextColumn as HTMLElement).style.width = `${nextColumnWidth - (diffX)}px`;
+                currentColumn.style.width = `${currentColumnWidth + diffX}px`;
             }
         });
 
-        document.addEventListener('mouseup', function (e) {
-            curCol = undefined;
-            nxtCol = undefined;
-            pageX = undefined;
-            nxtColWidth = undefined;
-            curColWidth = undefined
+        document.addEventListener('mouseup', (): void => {
+            currentColumn = undefined;
+            nextColumn = undefined;
+            elementPageX = undefined;
+            nextColumnWidth = undefined;
+            currentColumnWidth = undefined;
         });
     }
 
@@ -108,7 +181,6 @@ class ResizableTable {
 
         // get padding add result to number
         return (~~paddingLeft + ~~paddingRight);
-
     }
 
     /**
@@ -118,9 +190,8 @@ class ResizableTable {
      * @return string
      */
     protected static getStyleVal(elm: HTMLElement, css: string): string {
-        return (window.getComputedStyle(elm, null).getPropertyValue(css))
+        return (window.getComputedStyle(elm, null).getPropertyValue(css));
     }
 }
 
 export default ResizableTable;
-

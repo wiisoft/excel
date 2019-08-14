@@ -1,7 +1,7 @@
-import ResizableTable from './resizableTable'
-import Table from './table'
+import ResizableTable from './resizableTable';
+import Table from './table';
 
 export default {
     ResizableTable,
-    Table
+    Table,
 };
