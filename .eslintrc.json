@@ -15,9 +15,14 @@
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
+    "settings": {
+        "import/resolver": "webpack"
+    },
     "rules": {
         "no-console": "off",
         "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
-        "no-any": [true, { "ignore-rest-args": true }]
+        "no-any": [true, { "ignore-rest-args": true }],
+        "no-bitwise": ["error", { "allow": ["~"] }],
+        "no-param-reassign": [2, { "props": false }]
     }
 }
